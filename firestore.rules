@@ -1,0 +1,246 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Pillar 1 & Phase 4.1: Global Safety Net (Default Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Phase 3: Hardened Global Helpers
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isVerifiedUser() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isVerifiedUser() && (
+        request.auth.token.email == 'tvhisense15112025@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Validation Blueprints (Pillar 2: Anti-Update-Gap)
+    function isValidProduct(data) {
+      return data.keys().hasAll([
+          'name', 'category', 'price', 'stock', 'variants', 'sizes',
+          'imageKey', 'description', 'featured', 'updatedBy', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'name', 'category', 'price', 'stock', 'variants', 'sizes',
+          'imageKey', 'description', 'featured', 'updatedBy', 'createdAt', 'updatedAt'
+        ]) &&
+        data.name is string && data.name.size() >= 2 && data.name.size() <= 100 &&
+        data.category is string && data.category.size() <= 40 &&
+        data.category in ['Headgear', 'Shin Guards', 'Gloves', 'Apparel', 'Accessories'] &&
+        data.price is number && data.price >= 0 && data.price <= 100000 &&
+        data.stock is number && data.stock >= 0 && data.stock <= 100000 &&
+        data.variants is string && data.variants.size() >= 1 && data.variants.size() <= 120 &&
+        data.sizes is string && data.sizes.size() >= 1 && data.sizes.size() <= 80 &&
+        data.imageKey is string && data.imageKey.size() >= 1 && data.imageKey.size() <= 200 &&
+        data.description is string && data.description.size() >= 2 && data.description.size() <= 600 &&
+        data.featured is bool &&
+        data.updatedBy is string && isValidId(data.updatedBy) &&
+        data.updatedBy == request.auth.uid &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp &&
+        data.updatedAt == request.time;
+    }
+
+    function isValidCourse(data) {
+      return data.keys().hasAll([
+          'title', 'sportType', 'schedule', 'coach', 'level',
+          'priceSomoni', 'imageKey', 'description', 'updatedBy', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'title', 'sportType', 'schedule', 'coach', 'level',
+          'priceSomoni', 'imageKey', 'description', 'updatedBy', 'createdAt', 'updatedAt'
+        ]) &&
+        data.title is string && data.title.size() >= 2 && data.title.size() <= 100 &&
+        data.sportType is string && data.sportType.size() >= 2 && data.sportType.size() <= 60 &&
+        data.schedule is string && data.schedule.size() >= 2 && data.schedule.size() <= 120 &&
+        data.coach is string && data.coach.size() >= 2 && data.coach.size() <= 100 &&
+        data.level is string && data.level.size() >= 2 && data.level.size() <= 60 &&
+        data.priceSomoni is number && data.priceSomoni >= 0 && data.priceSomoni <= 100000 &&
+        data.imageKey is string && data.imageKey.size() >= 1 && data.imageKey.size() <= 200 &&
+        data.description is string && data.description.size() >= 2 && data.description.size() <= 600 &&
+        data.updatedBy is string && isValidId(data.updatedBy) &&
+        data.updatedBy == request.auth.uid &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp &&
+        data.updatedAt == request.time;
+    }
+
+    function isValidOrder(data) {
+      return data.keys().hasAll([
+          'userId', 'customerName', 'itemsSummary', 'itemCount',
+          'totalAmount', 'orderType', 'status', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'userId', 'customerName', 'itemsSummary', 'itemCount',
+          'totalAmount', 'orderType', 'status', 'createdAt', 'updatedAt'
+        ]) &&
+        data.userId is string && isValidId(data.userId) &&
+        data.customerName is string && data.customerName.size() >= 2 && data.customerName.size() <= 100 &&
+        data.itemsSummary is string && data.itemsSummary.size() >= 2 && data.itemsSummary.size() <= 500 &&
+        data.itemCount is number && data.itemCount >= 1 && data.itemCount <= 1000 &&
+        data.totalAmount is number && data.totalAmount >= 0 && data.totalAmount <= 1000000 &&
+        data.orderType is string && data.orderType.size() <= 20 &&
+        data.orderType in ['gear', 'tuition', 'program'] &&
+        data.status is string && data.status.size() <= 20 &&
+        data.status in ['pending', 'processing', 'shipped', 'completed', 'cancelled'] &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp &&
+        data.updatedAt == request.time;
+    }
+
+    function isValidUserProfile(data, userId) {
+      return data.keys().hasAll([
+          'uid', 'displayName', 'email', 'weightClass', 'experienceLevel',
+          'activeProgram', 'shippingAddress', 'phone', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'uid', 'displayName', 'email', 'weightClass', 'experienceLevel',
+          'activeProgram', 'shippingAddress', 'phone', 'createdAt', 'updatedAt'
+        ]) &&
+        data.uid is string && isValidId(data.uid) &&
+        data.uid == userId &&
+        data.uid == request.auth.uid &&
+        data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 100 &&
+        data.email is string && data.email.size() >= 3 && data.email.size() <= 150 &&
+        data.weightClass is string && data.weightClass.size() >= 1 && data.weightClass.size() <= 60 &&
+        data.experienceLevel is string && data.experienceLevel.size() <= 30 &&
+        data.experienceLevel in ['Beginner', 'Intermediate', 'Advanced', 'Pro Fighter'] &&
+        data.activeProgram is string && data.activeProgram.size() >= 1 && data.activeProgram.size() <= 100 &&
+        data.shippingAddress is string && data.shippingAddress.size() <= 250 &&
+        data.phone is string && data.phone.size() <= 40 &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp &&
+        data.updatedAt == request.time;
+    }
+
+    // Admins registry collection
+    match /admins/{adminId} {
+      allow get: if isVerifiedUser() && isValidId(adminId) && (request.auth.uid == adminId || isAdmin());
+      allow list: if isAdmin();
+      allow create, update, delete: if false;
+    }
+
+    // Products Catalog Collection
+    match /products/{productId} {
+      allow get: if isValidId(productId) && resource.data.price >= 0;
+      allow list: if resource.data.price >= 0;
+
+      allow create: if isAdmin() &&
+        isValidId(productId) &&
+        isValidProduct(incoming()) &&
+        incoming().createdAt == request.time;
+
+      allow update: if isAdmin() &&
+        isValidId(productId) &&
+        isValidProduct(incoming()) &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'name', 'category', 'price', 'stock', 'variants', 'sizes',
+          'imageKey', 'description', 'featured', 'updatedBy', 'updatedAt'
+        ]);
+
+      allow delete: if isAdmin() && isValidId(productId);
+    }
+
+    // Sports Courses Collection (Viewable by all, CRUD by Admin)
+    match /courses/{courseId} {
+      allow get: if isValidId(courseId) && resource.data.priceSomoni >= 0;
+      allow list: if resource.data.priceSomoni >= 0;
+
+      allow create: if isAdmin() &&
+        isValidId(courseId) &&
+        isValidCourse(incoming()) &&
+        incoming().createdAt == request.time;
+
+      allow update: if isAdmin() &&
+        isValidId(courseId) &&
+        isValidCourse(incoming()) &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'title', 'sportType', 'schedule', 'coach', 'level',
+          'priceSomoni', 'imageKey', 'description', 'updatedBy', 'updatedAt'
+        ]);
+
+      allow delete: if isAdmin() && isValidId(courseId);
+    }
+
+    // Orders Collection
+    match /orders/{orderId} {
+      allow get: if isVerifiedUser() &&
+        isValidId(orderId) &&
+        (existing().userId == request.auth.uid || isAdmin());
+
+      allow list: if isVerifiedUser() &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+
+      allow create: if isVerifiedUser() &&
+        isValidId(orderId) &&
+        isValidOrder(incoming()) &&
+        incoming().userId == request.auth.uid &&
+        incoming().status == 'pending' &&
+        incoming().createdAt == request.time;
+
+      allow update: if isVerifiedUser() &&
+        isValidId(orderId) &&
+        isValidOrder(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt && (
+          (isAdmin() &&
+            incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt'])) ||
+          (existing().userId == request.auth.uid &&
+            !(existing().status in ['completed', 'cancelled', 'shipped']) &&
+            incoming().status == 'cancelled' &&
+            incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']))
+        );
+
+      allow delete: if isAdmin() && isValidId(orderId);
+    }
+
+    // User Profiles Collection (Pillar 6: PII Isolation)
+    match /users/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isAdmin();
+
+      allow create: if isOwner(userId) &&
+        isValidId(userId) &&
+        isValidUserProfile(incoming(), userId) &&
+        incoming().createdAt == request.time;
+
+      allow update: if isOwner(userId) &&
+        isValidId(userId) &&
+        isValidUserProfile(incoming(), userId) &&
+        incoming().uid == existing().uid &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'displayName', 'email', 'weightClass', 'experienceLevel',
+          'activeProgram', 'shippingAddress', 'phone', 'updatedAt'
+        ]);
+
+      allow delete: if isAdmin() && isValidId(userId);
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Usmonov Time Hall",
+  "description": "Official mobile & web platform for Zarrukh Adashev Performance School (The Lion) — elite MMA & Kickboxing training in NYC, pro fight gear store, real-time cloud sync, and admin inventory management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

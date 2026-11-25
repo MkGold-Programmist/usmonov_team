@@ -1,0 +1,344 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "AzamZaL official fight gear and athletic equipment item priced in Somoni (TJS).",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100,
+          "description": "Display name of the fight gear product."
+        },
+        "category": {
+          "type": "string",
+          "enum": ["Headgear", "Shin Guards", "Gloves", "Apparel", "Accessories"],
+          "maxLength": 40,
+          "description": "Product category."
+        },
+        "price": {
+          "type": "number",
+          "description": "Price in Tajikistani Somoni (TJS)."
+        },
+        "stock": {
+          "type": "number",
+          "description": "Available inventory count."
+        },
+        "variants": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "description": "Colorway and variant label."
+        },
+        "sizes": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "description": "Comma-separated available sizes."
+        },
+        "imageKey": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Asset key or URL for product studio visual."
+        },
+        "description": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 600,
+          "description": "Technical specifications and materials description."
+        },
+        "featured": {
+          "type": "boolean",
+          "description": "Whether product is highlighted on the storefront."
+        },
+        "updatedBy": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "UID of the user who created or updated the item."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of creation."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last update."
+        }
+      },
+      "required": [
+        "name",
+        "category",
+        "price",
+        "stock",
+        "variants",
+        "sizes",
+        "imageKey",
+        "description",
+        "featured",
+        "updatedBy",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Course": {
+      "title": "Course",
+      "description": "AzamZaL sports training discipline or martial arts course (viewable schedule and pricing in Somoni).",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100,
+          "description": "Course or sport discipline name."
+        },
+        "sportType": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 60,
+          "description": "Sport category (e.g. MMA, Kickboxing, Wrestling, Boxing)."
+        },
+        "schedule": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120,
+          "description": "Training days and time slots."
+        },
+        "coach": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100,
+          "description": "Lead coach or trainer name."
+        },
+        "level": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 60,
+          "description": "Skill level description."
+        },
+        "priceSomoni": {
+          "type": "number",
+          "description": "Monthly fee in Tajikistani Somoni (TJS)."
+        },
+        "imageKey": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Course visual path."
+        },
+        "description": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 600,
+          "description": "Course curriculum overview."
+        },
+        "updatedBy": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "UID of the admin who updated the course."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of creation."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last update."
+        }
+      },
+      "required": [
+        "title",
+        "sportType",
+        "schedule",
+        "coach",
+        "level",
+        "priceSomoni",
+        "imageKey",
+        "description",
+        "updatedBy",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer gear order record priced in Somoni (TJS).",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "UID of the authenticated customer."
+        },
+        "customerName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100,
+          "description": "Full name of the customer."
+        },
+        "itemsSummary": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 500,
+          "description": "Human-readable summary of ordered items."
+        },
+        "itemCount": {
+          "type": "number",
+          "description": "Total number of items in the order."
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "Total order cost in Somoni (TJS)."
+        },
+        "orderType": {
+          "type": "string",
+          "enum": ["gear", "tuition", "program"],
+          "maxLength": 20,
+          "description": "Type of transaction."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "processing", "shipped", "completed", "cancelled"],
+          "maxLength": 20,
+          "description": "Current fulfillment status."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of creation."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last update."
+        }
+      },
+      "required": [
+        "userId",
+        "customerName",
+        "itemsSummary",
+        "itemCount",
+        "totalAmount",
+        "orderType",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Private athlete account profile and shipping preferences.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Owner Firebase Auth UID."
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Athlete display name."
+        },
+        "email": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 150,
+          "description": "User email address (PII)."
+        },
+        "weightClass": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60,
+          "description": "Athlete weight class."
+        },
+        "experienceLevel": {
+          "type": "string",
+          "enum": ["Beginner", "Intermediate", "Advanced", "Pro Fighter"],
+          "maxLength": 30,
+          "description": "Martial arts experience tier."
+        },
+        "activeProgram": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Preferred sport discipline."
+        },
+        "shippingAddress": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 250,
+          "description": "Delivery address for gear orders (PII)."
+        },
+        "phone": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 40,
+          "description": "Contact phone number (PII)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of profile creation."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last profile update."
+        }
+      },
+      "required": [
+        "uid",
+        "displayName",
+        "email",
+        "weightClass",
+        "experienceLevel",
+        "activeProgram",
+        "shippingAddress",
+        "phone",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": {
+        "$ref": "#/entities/Product"
+      },
+      "description": "Real-time catalog of AzamZaL pro fight gear in Somoni (TJS)."
+    },
+    "/courses/{courseId}": {
+      "schema": {
+        "$ref": "#/entities/Course"
+      },
+      "description": "Real-time catalog of AzamZaL sports classes and training courses in Somoni (TJS)."
+    },
+    "/orders/{orderId}": {
+      "schema": {
+        "$ref": "#/entities/Order"
+      },
+      "description": "Customer gear orders in Somoni (TJS)."
+    },
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/UserProfile"
+      },
+      "description": "Isolated user profiles containing personal athlete preferences and PII."
+    }
+  }
+}

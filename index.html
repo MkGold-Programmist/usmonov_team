@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      (function () {
+        try {
+          var currentFetch = typeof window.fetch === 'function' ? window.fetch.bind(window) : undefined;
+          var makeFetchWritable = function (target) {
+            if (!target) return;
+            var desc = Object.getOwnPropertyDescriptor(target, 'fetch');
+            if (!desc || desc.configurable) {
+              Object.defineProperty(target, 'fetch', {
+                configurable: true,
+                enumerable: true,
+                get: function () {
+                  return currentFetch;
+                },
+                set: function (fn) {
+                  if (typeof fn === 'function') {
+                    currentFetch = fn;
+                  }
+                },
+              });
+            }
+          };
+          makeFetchWritable(window);
+          if (typeof Window !== 'undefined' && Window.prototype) {
+            makeFetchWritable(Window.prototype);
+          }
+        } catch (_) {}
+
+        window.addEventListener(
+          'error',
+          function (event) {
+            var filename = (event && event.filename) || '';
+            var message = (event && event.message) || '';
+            if (
+              filename.indexOf('chrome-extension://') === 0 ||
+              filename.indexOf('moz-extension://') === 0 ||
+              filename.indexOf('@vite/client') !== -1 ||
+              message.indexOf('Cannot set property fetch') !== -1 ||
+              message.indexOf('WebSocket closed without opened') !== -1
+            ) {
+              event.stopImmediatePropagation();
+              event.preventDefault();
+              return false;
+            }
+          },
+          true
+        );
+
+        window.addEventListener(
+          'unhandledrejection',
+          function (event) {
+            var reason = event && event.reason;
+            var msg = (reason && (reason.message || String(reason))) || '';
+            if (
+              msg.indexOf('WebSocket closed without opened') !== -1 ||
+              msg.indexOf('Cannot set property fetch') !== -1
+            ) {
+              event.stopImmediatePropagation();
+              event.preventDefault();
+            }
+          },
+          true
+        );
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>UsmonovTeam — Вольная Борьба · Тренер Аъзам Усмонов · Худжанд</title>
+    <meta name="description" content="Официальное веб-приложение школы вольной борьбы UsmonovTeam в Худжанде. Занятия под руководством владельца и тренера Аъзама Усмонова, тел. +992 92 883-80-80, каталог борцовской экипировки и прямая связь с владельцем через @UsmonovTeamBot." />
+    <meta property="og:title" content="UsmonovTeam — Вольная Борьба · Худжанд" />
+    <meta property="og:description" content="1-й зал вольной борьбы UsmonovTeam в Худжанде: тренер Аъзам Усмонов, тел. +992 92 883-80-80, Пн/Ср/Пт (16:00–21:00, 3 смены) и Шн (Кросс), заказы и связь через @UsmonovTeamBot." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#FAF6F0" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="UsmonovTeam" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body class="bg-[#FAF6F0] text-[#1C1917] antialiased selection:bg-[#C2410C] selection:text-white">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
